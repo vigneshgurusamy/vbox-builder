@@ -1,0 +1,3 @@
+---
+mailhog_url: https://github.com/mailhog/MailHog/releases/download/v0.2.1/MailHog_linux_amd64
+mailhog_dest: /usr/local/bin/mailhog

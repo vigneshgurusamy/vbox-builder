@@ -1,0 +1,9 @@
+---
+- name: Download mailhog
+  get_url: url={{ mailhog_url }} dest={{ mailhog_dest }} mode=a+x
+
+- name: Copy mailhog service script
+  template: src=templates/mailhog.service.j2 dest=/etc/systemd/system/mailhog.service
+
+- name: Ensure mailhog is enabled and will start on boot
+  service: name=mailhog state=started enabled=yes

@@ -9,7 +9,8 @@
     - nginx
     - php
     - postgresql
-    # - redis
-    # - mailhog
-    # - supervisor
+    - redis
+    - mailhog
+    - supervisor
+    - composer
 

@@ -1,0 +1,13 @@
+---
+- name: Add redis-server repository
+  apt_repository: repo='ppa:chris-lea/redis-server' state=present
+  register: ppastable
+
+- name: Install redis
+  apt: name=redis-server state=installed update_cache=yes
+  when: ppastable|success
+  register: redisinstalled
+
+- name: Start redis-server
+  service: name=redis-server state=started enabled=yes
+  when: redisinstalled|success
