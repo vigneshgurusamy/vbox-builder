@@ -19,41 +19,47 @@
     - php{{ php_version }}-intl
     - php-xdebug
   when: ppastable|success
-  register: phpinstalled
+  register: php_installed
+
+- name: Ensure php-fpm is enabled and will start on boot
+  service: name=php7.1-fpm state=started enabled=yes
+  when: php_installed|success
 
 - name: Configure php fpm
-  lineinfile: dest=/etc/php/{{ php_version }}/cli/php.ini
-              regexp={{ item.exp }}
-              line={{ item.line }}
-              backrefs=yes
-              state=present
+  lineinfile:
+    dest: /etc/php/{{ php_version }}/cli/php.ini
+    regexp: "{{ item.exp }}"
+    line: "{{ item.line }}"
+    backrefs: yes
+    state: present
   with_items:
     - { exp: '^error_reporting = *', line: 'error_reporting = E_ALL' }
     - { exp: '^display_errors = *', line: 'display_errors = On' }
     - { exp: '^memory_limit = *', line: 'memory_limit = 512M' }
     - { exp: '^;date.timezone = *', line: 'date.timezone = UTC' }
-  when: phpinstalled|success
+  when: php_installed|success
 
 - name: Disable php xdebug in cli
   command: phpdismod -s cli xdebug
   args:
     removes: /etc/php/{{ php_version }}/cli/conf.d/20-xdebug.ini
-  when: phpinstalled|success
+  when: php_installed|success
 
 - name: Configure php xdebug
   copy: src=templates/xdebug.ini dest=/etc/php/{{ php_version }}/mods-available/xdebug.ini
-  when: phpinstalled|success
+  when: php_installed|success
 
 - name: Configure php opcache
   copy: src=templates/opcache.ini dest=/etc/php/{{ php_version }}/mods-available/opcache.ini
-  when: phpinstalled|success
+  when: php_installed|success
 
 - name: Configure php fpm
-  lineinfile: dest=/etc/php/{{ php_version }}/fpm/php.ini
-              regexp={{ item.exp }}
-              line={{ item.line }}
-              backrefs=yes
-              state=present
+  lineinfile:
+    dest: /etc/php/{{ php_version }}/fpm/php.ini
+    regexp: "{{ item.exp }}"
+    line: "{{ item.line }}"
+    backrefs: yes
+    state: present
   with_items:
     - { exp: '^error_reporting = *', line: 'error_reporting = E_ALL' }
     - { exp: '^display_errors = *', line: 'display_errors = On' }
@@ -62,18 +68,23 @@
     - { exp: '^;cgi.fix_pathinfo=*', line: 'cgi.fix_pathinfo=0' }
     - { exp: '^upload_max_filesize = *', line: 'upload_max_filesize = 100M' }
     - { exp: '^post_max_size = *', line: 'post_max_size = 100M' }
-  when: phpinstalled|success
+  when: php_installed|success
+  notify:
+    - Restart php-fpm
 
 - name: Configure php fpm pool
-  lineinfile: dest=/etc/php/{{ php_version }}/fpm/pool.d/www.conf
-              regexp={{ item.exp }}
-              line={{ item.line }}
-              backrefs=yes
-              state=present
+  lineinfile:
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+    regexp: "{{ item.exp }}"
+    line: "{{ item.line }}"
+    backrefs: yes
+    state: present
   with_items:
     - { exp: '^user = *', line: 'user = vagrant' }
     - { exp: '^group = *', line: 'group = vagrant' }
     - { exp: '^listen.owner = *', line: 'listen.owner = vagrant' }
     - { exp: '^listen.group = *', line: 'listen.group = vagrant' }
     - { exp: '^;listen.mode = *', line: 'listen.mode = 0666' }
-  when: phpinstalled|success
+  when: php_installed|success
+  notify:
+    - Restart php-fpm

@@ -8,9 +8,9 @@
     - common
     - nginx
     - php
+    - composer
     - postgresql
     - redis
     - mailhog
     - supervisor
-    - composer
-
+    - beanstalkd

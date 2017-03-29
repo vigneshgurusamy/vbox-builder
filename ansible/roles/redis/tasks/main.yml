@@ -6,8 +6,8 @@
 - name: Install redis
   apt: name=redis-server state=installed update_cache=yes
   when: ppastable|success
-  register: redisinstalled
+  register: redis_installed
 
 - name: Start redis-server
   service: name=redis-server state=started enabled=yes
-  when: redisinstalled|success
+  when: redis_installed|success

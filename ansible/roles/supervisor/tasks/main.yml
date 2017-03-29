@@ -1,17 +1,15 @@
 ---
 - name: Install supervisor
   apt: name=supervisor state=installed update_cache=yes
-  register: supervisorinstalled
+  register: supervisor_installed
 
 - name: Start supervisor
   service: name=supervisor state=started enabled=yes
-  when: supervisorinstalled|success
+  when: supervisor_installed|success
 
 - name: Configure supervisor for web access
   ini_file: dest=/etc/supervisor/supervisord.conf section=inet_http_server option=port value='*:9001' state=present
   register: webaccess
-  when: supervisorinstalled|success
-
-- name: Restart supervisor
-  service: name=supervisor state=restarted
-  when: supervisorinstalled|success and webaccess.changed
+  when: supervisor_installed|success
+  notify:
+    - Restart supervisor

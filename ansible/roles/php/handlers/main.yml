@@ -1,9 +1,3 @@
 ---
-- name: Start php-fpm
-  service: name=php7.1-fpm state=started enabled=yes
-
 - name: Restart php-fpm
   service: name=php7.1-fpm state=restarted
-
-- name: Stop php-fpm
-  service: name=php7.1-fpm state=stopped
