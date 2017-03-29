@@ -1,0 +1,30 @@
+---
+- name: Add nginx ppa repository
+  apt_repository: repo='ppa:nginx/stable' state=present
+  register: ppastable
+
+- name: Install nginx
+  apt: name=nginx state=installed update_cache=yes
+  when: ppastable|success
+  register: nginxinstalled
+  notify:
+    - Start nginx
+
+- name: Disable nginx default site
+  file: path="/etc/nginx/sites-enabled/default" state=absent
+  when: nginxinstalled|success
+  notify:
+    - Reload nginx
+
+- name: Configure nginx
+  lineinfile: dest=/etc/nginx/nginx.conf
+              regexp={{ item.exp }}
+              line={{ item.line }}
+              backrefs=yes
+              state=present
+  with_items:
+    - { exp: '^user www-data;', line: 'user vagrant;' }
+    - { exp: '# server_names_hash_bucket_size 64;', line: 'server_names_hash_bucket_size 64;' }
+  when: nginxinstalled|success
+  notify:
+    - Reload nginx
