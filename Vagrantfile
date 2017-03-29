@@ -73,4 +73,5 @@ Vagrant.configure("2") do |config|
     ansible.sudo = true
     ansible.verbose = "v"
   end
+  config.vm.provision "shell", path: './cleanup.sh'
 end
