@@ -1,0 +1,19 @@
+---
+- name: Install beanstalkd
+  apt: name=beanstalkd state=installed update_cache=yes
+  register: beanstalkd_installed
+
+- name: Ensure beanstalkd is enabled and will start on boot
+  service: name=beanstalkd state=started enabled=yes
+  when: beanstalkd_installed|success
+
+- name: Enable boot configuration
+  lineinfile:
+    dest: /etc/default/beanstalkd
+    regexp: '^#START=yes'
+    line: 'START=yes'
+    backrefs: yes
+    state: present
+  when: beanstalkd_installed|success
+  notify:
+    - Restart beanstalkd
